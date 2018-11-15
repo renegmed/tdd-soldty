@@ -7,11 +7,17 @@ library StringToUintMap {
     mapping (string => uint8) map;
   }
 
+  // NOTE: changing functions type 
+  // from public to internal makes compiling the 
+  // library becomes the part of the compiled code of
+  // the contract and does not have to be
+  // deployed separately.
+
   function insert (
     Data storage self,
     string key, 
     uint8 value
-  ) public returns (bool updated) 
+  ) internal returns (bool updated) 
   {
     require(value > 0);
 
@@ -19,7 +25,7 @@ library StringToUintMap {
     self.map[key] = value;	
   }
 
-  function get(Data storage self, string key) public returns (uint8) {
+  function get(Data storage self, string key) internal returns (uint8) {
     return self.map[key];
   } 
 }
