@@ -50,5 +50,15 @@ contract("Funding", accounts => {
     assert.ok(finalBalance.greaterThan(initBalance));  // hard to be exact due to the gas usage 
   });
 
+  it("does not allow non-owners to withdraw funds", async () => {
+    funding = await Funding.new(DAY, 100 * FINNEY, { from: secondAccount });
+    await funding.donate({ from: firstAccount, value: 100 * FINNEY });
+    try {
+      await funding.withdraw();
+      assert.fail();
+    } catch (err) {
+      assert.ok(/revert/.test(err.message));
+    }
+  });
 });
 

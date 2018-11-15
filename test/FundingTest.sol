@@ -3,6 +3,7 @@ pragma solidity 0.4.24;
 
 import "truffle/Assert.sol";
 import "../contracts/Funding.sol";
+import "truffle/DeployedAddresses.sol";
 
 contract FundingTest {
   Funding funding;
@@ -57,7 +58,16 @@ contract FundingTest {
     result = funding.call(bytes4(keccak256("withdraw()")));
     Assert.equal(result, true, "Doesn't allow for withdrawal after reaching the goal");
     Assert.equal(this.balance, initBalance, "Balance after withdrawal deosn't correspond the sum of donations");
-   	
+
   }
+
+  // NOT WORKING
+  //function testWithdrawalByNotAnOwner() public {
+    // Make sure to check what goal is set in the migration (here also 100 Finney)
+    //funding = Funding(DeployedAddresses.Funding());
+    //funding.donate.value(100 finney)();
+    //bool result = funding.call(bytes4(keccak256("withdraw()")));
+    //Assert.equal(result, false, "Do not allow withdrawal by non-owner of the contract");
+  //}
 }
 

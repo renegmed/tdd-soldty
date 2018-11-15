@@ -8,6 +8,11 @@ contract Funding {
   mapping(address => uint) public balances; 
 
   uint public goal;
+
+  modifier onlyOwner() {
+    require(owner == msg.sender);
+    _;
+  }
  
   modifier onlyFunded() {
     require(isFunded());
@@ -29,7 +34,7 @@ contract Funding {
     return raised >= goal;
   }
 
-  function withdraw() public onlyFunded {
+  function withdraw() public onlyOwner onlyFunded {
     owner.transfer(this.balance);
   }
 
