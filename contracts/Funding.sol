@@ -1,7 +1,13 @@
 // contracts/Funding.sol
 pragma solidity 0.4.24;
 
-contract Funding {
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
+
+contract Funding is Ownable {
+  using SafeMath for uint;
+
   uint public raised;
   uint public finishesAt;
   address public owner;
@@ -9,11 +15,6 @@ contract Funding {
 
   uint public goal;
 
-  modifier onlyOwner() {
-    require(owner == msg.sender);
-    _;
-  }
- 
   modifier onlyNotFunded() {
     require(!isFunded());
     _;
