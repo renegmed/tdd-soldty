@@ -20,5 +20,12 @@ contract FundingTest {
     funding.donate.value(20 finney)();
     Assert.equal(funding.raised(), 30 finney, "Raised amount is different than sum of donations");
   }
+
+  function testTrackingDonorsBalance() public { 
+    Funding funding = new Funding();
+    funding.donate.value(5 finney)();
+    funding.donate.value(15 finney)();
+    Assert.equal(funding.balances(this), 20 finney, "Donator balance is different than sum of donations");
+  }
 }
 

@@ -17,5 +17,14 @@ contract("Funding", accounts => {
     assert.equal(await funding.raised.call(), 30 * FINNEY);
  		
   });	
+
+  it("keeps track of donator balance", async () => {
+    const funding = await Funding.new();
+    await funding.donate({ from: firstAccount, value: 5 * FINNEY });
+    await funding.donate({ from: secondAccount, value: 15 * FINNEY }); 
+    await funding.donate({ from: secondAccount, value: 3 * FINNEY });
+    assert.equal( await funding.balances.call(firstAccount), 5 * FINNEY );
+    assert.equal( await funding.balances.call(secondAccount), 18 * FINNEY ); 	
+  });
 });
 
