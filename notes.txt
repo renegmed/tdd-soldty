@@ -1,0 +1,7 @@
+SOURCES:
+
+https://michalzalecki.com/ethereum-test-driven-introduction-to-solidity/
+
+https://zohaib.me/reusable-code-in-solidity-using-library/ 
+
+
