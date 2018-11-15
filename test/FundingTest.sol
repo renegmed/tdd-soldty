@@ -8,8 +8,14 @@ contract FundingTest {
   Funding funding;
   uint public initialBalance = 10 ether;
 
+  // this allows contract to accept Ether via 
+  // standard transaction (without data) like it 
+  // would be an oridinary account controlled 
+  // by a public key. Named fallback function.
+  function () public payable {}
+
   function beforeEach() public {
-    funding = new Funding(1 days);
+    funding = new Funding(1 days, 100 finney);
   }
 
   function testSettingAnOwnerDuringCreation() public {
@@ -33,11 +39,25 @@ contract FundingTest {
     bool result = funding.call.value(10 finney)(bytes4(bytes32(keccak256("donate()"))));
     Assert.equal(result, true, "Should allow for donations before the deadline.");
     
-    funding = new Funding(0);
+    funding = new Funding(0, 100 finney);
     result = funding.call.value(10 finney)(bytes4(bytes32(keccak256("donate()"))));
     Assert.equal(result, false, "Should not allow for donations when time is up.");
-
     
+  }
+
+  function testWithdrawalByAnOwner() public {
+    uint initBalance = this.balance;
+    funding.donate.value(50 finney)();
+    bool result = funding.call(bytes4(keccak256("withdraw()")));
+    Assert.equal(result, false, "Allows for withdrawal before reaching the goal");
+
+    funding.donate.value(50 finney)();
+    Assert.equal(this.balance, initBalance - 100 finney, "Balance before withdrawal doesn't correspond the sum of donations");
+    
+    result = funding.call(bytes4(keccak256("withdraw()")));
+    Assert.equal(result, true, "Doesn't allow for withdrawal after reaching the goal");
+    Assert.equal(this.balance, initBalance, "Balance after withdrawal deosn't correspond the sum of donations");
+   	
   }
 }
 

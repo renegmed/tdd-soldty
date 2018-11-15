@@ -7,12 +7,12 @@ const FINNEY = 10**15;
 
 contract("Funding", accounts => {
   
-  const [firstAccount, secondAccount] = accounts;
+  const [firstAccount, secondAccount, thirdAccount] = accounts;
   
   let funding;
 
   beforeEach( async () => {
-    funding = await Funding.new(DAY);	
+    funding = await Funding.new(DAY, 100 * FINNEY);	
   });
 
   it("sets an owner", async () => {
@@ -40,6 +40,15 @@ contract("Funding", accounts => {
     assert.equal( await funding.isFinished.call(), true);
   });
 
+  it("allows an owner to withdraw funds when goal is reached", async () =>{
+    await funding.donate({ from: secondAccount, value: 30 * FINNEY });
+    await funding.donate({ from: thirdAccount, value: 70 * FINNEY });
+    const initBalance = web3.eth.getBalance(firstAccount);
+    assert.equal(web3.eth.getBalance(funding.address), 100 * FINNEY);
+    await funding.withdraw();
+    const finalBalance = web3.eth.getBalance(firstAccount);
+    assert.ok(finalBalance.greaterThan(initBalance));  // hard to be exact due to the gas usage 
+  });
 
 });
 
