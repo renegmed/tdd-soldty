@@ -12,7 +12,7 @@ contract("Funding", accounts => {
   let funding;
 
   beforeEach( async () => {
-    funding = await Funding.new(DAY, 100 * FINNEY);	
+    funding = await Funding.new(DAY, 100 * FINNEY, { from: firstAccount });	
   });
 
   it("sets an owner", async () => {
@@ -58,6 +58,52 @@ contract("Funding", accounts => {
       assert.fail();
     } catch (err) {
       assert.ok(/revert/.test(err.message));
+    }
+  });
+
+  it("not allowed to withdraw funds after time is up", async () => {
+    await funding.donate({ from: secondAccount, value: 50 * FINNEY });
+    const initBalance = web3.eth.getBalance(secondAccount);
+    try {
+      await funding.refund({ from: secondAccount });
+      assert.fail();  // refund not allowed
+    } catch (err) {
+      assert.ok(/revert/.test(err.message)); // it's ok to revert
+    }
+  });
+
+  it("allows to withdraw funds after time is up and goal is not reached", async () => {
+    await funding.donate({ from: secondAccount, value: 50 * FINNEY });
+    const initBalance = web3.eth.getBalance(secondAccount);
+    assert.equal(( await funding.balances.call(secondAccount)), 50 * FINNEY);
+    
+    await increaseTime(DAY);
+    await funding.refund({ from: secondAccount });
+    const finalBalance = web3.eth.getBalance(secondAccount); 
+    assert.ok(finalBalance.greaterThan(initBalance)); // hard to be exact due to the gas usage
+
+  });
+
+  it("does not allow to withdraw funds after time is up and goal is reached", async () => {
+    await funding.donate({ from: secondAccount, value: 100 * FINNEY });
+    assert.equal(( await funding.balances.call(secondAccount)), 100 * FINNEY);
+    await increaseTime(DAY);  // time is up
+    try {
+      await funding.refund({ from: secondAccount });
+      assert.fail(); // cannot refund
+    } catch (err) {
+      assert.ok(/revert/.test(err.message));
+    }
+  });
+
+  it("does not allow to withdraw funds before time is up and goal is not reached", async () => {
+    await funding.donate({ from: secondAccount, value: 50 * FINNEY });
+    assert.equal((await funding.balances.call(secondAccount)), 50 * FINNEY);
+    try {
+      await funding.refund({ from: secondAccount });
+      assert.fail(); // should not refund
+    } catch (err) {
+       assert.ok(/revert/.test(err.message));  // VM Exception while processing transaction: reverti
     }
   });
 });

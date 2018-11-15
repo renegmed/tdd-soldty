@@ -14,6 +14,11 @@ contract Funding {
     _;
   }
  
+  modifier onlyNotFunded() {
+    require(!isFunded());
+    _;
+  }
+
   modifier onlyFunded() {
     require(isFunded());
     _;
@@ -21,6 +26,11 @@ contract Funding {
 
   modifier onlyNotFinished() {
     require(!isFinished());
+    _;
+  }
+
+  modifier onlyFinished() {
+    require(isFinished());
     _;
   }
 
@@ -48,6 +58,12 @@ contract Funding {
     raised += msg.value;
   }
 
+  function refund() public onlyFinished onlyNotFunded {
+    uint amount = balances[msg.sender];
+    require(amount > 0 );
+    balances[msg.sender] = 0;
+    msg.sender.transfer(amount);
+  }
 }
 
 
